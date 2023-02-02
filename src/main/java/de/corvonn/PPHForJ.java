@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import de.corvonn.client.domains.Domain;
 import de.corvonn.client.invoices.Invoice;
 import de.corvonn.client.invoices.InvoiceDonationItem;
 import de.corvonn.client.invoices.InvoiceItem;
@@ -12,6 +13,7 @@ import de.corvonn.enums.InvoiceType;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -26,7 +28,8 @@ import java.util.List;
 public class PPHForJ {
 
     private static final String API_WEB_LINK = "https://api.pph.sh/",
-            INVOICES_PATH = "client/invoices";
+            INVOICES_PATH = "client/invoices",
+            DOMAINS_PATH = "client/domains";
 
     private final String token;
 
@@ -141,6 +144,65 @@ public class PPHForJ {
         });
 
         return invoices;
+    }
+
+
+    /**
+     * Requests all domains from the given account.
+     * @return a list of {@link Domain}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    public List<Domain> getDomains() throws IOException {
+        return getDomainsIntern(null);
+    }
+
+    /**
+     * Requests one specific domain from the given account.
+     * @param domainID the ID of the domain to be requested. Use null to request all domains.
+     * @return a list of {@link Domain}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    public Domain getDomain(int domainID) throws IOException {
+        List<Domain> c = getDomainsIntern(domainID);
+        if(c.size() == 1) return c.get(0);
+        return null;
+    }
+
+    /**
+     * Requests all or a specific domain(s) from the given account.
+     * @param domainID the ID of the domain to be requested. Use null to request all domains.
+     * @return a list of {@link Domain}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    private List<Domain> getDomainsIntern(Integer domainID) throws IOException {
+        String getParams = "";
+        if(domainID != null) getParams = "/" + domainID;
+        HttpsURLConnection con = getConnection(DOMAINS_PATH + getParams);
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        }catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("The given domainID " + domainID + " is not valid.");
+        }
+        StringBuilder content = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            content.append(line);
+        }
+        reader.close();
+        con.disconnect();
+
+        List<Domain> domains = new ArrayList<>();
+        if(getParams.equals("")) {
+            JsonParser.parseString(content.toString()).getAsJsonObject().get("data").getAsJsonArray().forEach(element ->
+                    domains.add(new Domain(element.getAsJsonObject())));
+        }else{
+            domains.add(new Domain(JsonParser.parseString(content.toString()).getAsJsonObject().get("data").getAsJsonObject()));
+        }
+        return domains;
     }
 
 
