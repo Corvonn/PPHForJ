@@ -3,6 +3,10 @@ package de.corvonn.client.invoices;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
+/**
+ * Represents a transaction from an invoice. When an invoice is paid by a transaction (for example, a server is not
+ * paid by credits or credits are charged), the invoice contains this object.
+ */
 public class Transaction {
     private final int invoiceID;
     private final String gateway, dateHumanReadable, description;

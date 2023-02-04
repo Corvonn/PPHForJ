@@ -2,6 +2,11 @@ package de.corvonn.client.invoices;
 
 import de.corvonn.enums.InvoiceType;
 
+/**
+ * Defines an item from an invoice. <br>
+ * An invoice can contain different products. Each individual product is an item.
+ * But also for example discounts count as an item of the invoice.
+ */
 public class InvoiceItem {
     private final int id, invoiceID;
     private final InvoiceType type;

@@ -3,6 +3,9 @@ package de.corvonn.enums;
 
 import java.util.HashMap;
 
+/**
+ * The InvoiceType describes the types that an invoiceItem could be.
+ */
 public enum InvoiceType {
     /**
      * Nur Spenden werden gelistet

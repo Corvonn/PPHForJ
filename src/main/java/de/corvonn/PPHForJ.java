@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.corvonn.client.domains.Domain;
+import de.corvonn.client.hostings.CancelledHosting;
+import de.corvonn.client.hostings.Hosting;
 import de.corvonn.client.invoices.Invoice;
 import de.corvonn.client.invoices.InvoiceDonationItem;
 import de.corvonn.client.invoices.InvoiceItem;
@@ -29,7 +31,8 @@ public class PPHForJ {
 
     private static final String API_WEB_LINK = "https://api.pph.sh/",
             INVOICES_PATH = "client/invoices",
-            DOMAINS_PATH = "client/domains";
+            DOMAINS_PATH = "client/domains",
+            HOSTINGS_PATH = "client/hostings";
 
     private final String token;
 
@@ -153,6 +156,7 @@ public class PPHForJ {
      * @throws IOException Signals that an I/O exception of some sort has occurred
      * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
      */
+    @SuppressWarnings("unused")
     public List<Domain> getDomains() throws IOException {
         return getDomainsIntern(null);
     }
@@ -164,6 +168,7 @@ public class PPHForJ {
      * @throws IOException Signals that an I/O exception of some sort has occurred
      * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
      */
+    @SuppressWarnings("unused")
     public Domain getDomain(int domainID) throws IOException {
         List<Domain> c = getDomainsIntern(domainID);
         if(c.size() == 1) return c.get(0);
@@ -177,6 +182,7 @@ public class PPHForJ {
      * @throws IOException Signals that an I/O exception of some sort has occurred
      * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
      */
+    @SuppressWarnings("unused")
     private List<Domain> getDomainsIntern(Integer domainID) throws IOException {
         String getParams = "";
         if(domainID != null) getParams = "/" + domainID;
@@ -203,6 +209,97 @@ public class PPHForJ {
             domains.add(new Domain(JsonParser.parseString(content.toString()).getAsJsonObject().get("data").getAsJsonObject()));
         }
         return domains;
+    }
+
+
+    /**
+     * Requests a specific hosting from the given account.
+     * @param hostID the id of the host that should be requested
+     * @return the requested {@link Hosting}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    @SuppressWarnings("unused")
+    public Hosting getHosting(int hostID) throws IOException{
+        try {
+            return getHosting(getHostingsJson("/" + hostID).get("data").getAsJsonObject());
+        }catch (FileNotFoundException e) {
+            throw new IllegalArgumentException("The given hostingID is not valid.");
+        }
+    }
+
+    /**
+     * Requests up to 25 active hostings from the given account.
+     * @return a {@link List} of {@link Hosting}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    @SuppressWarnings("unused")
+    public List<Hosting> getHostings() throws IOException {
+        return getHostings(true, 25);
+    }
+
+    /**
+     * Requests up to 25 hostings from the given account.
+     * @param onlyActive whether only active hostings should be requested
+     * @return a {@link List} of {@link Hosting}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    @SuppressWarnings("unused")
+    public List<Hosting> getHostings(boolean onlyActive) throws IOException {
+        return getHostings(onlyActive, 25);
+    }
+
+    /**
+     * Requests all hostings from the given account.
+     * @param onlyActive whether only active hostings should be requested
+     * @param amount the amount of hostings that should be requested
+     * @return a {@link List} of {@link Hosting}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    public List<Hosting> getHostings(boolean onlyActive, int amount) throws IOException {
+        List<Hosting> hostings = new ArrayList<>();
+        getHostingsJson((onlyActive ? "?active=true" : "") + "?per_page=" + amount).get("data").getAsJsonArray().forEach(element ->
+                hostings.add(getHosting(element.getAsJsonObject())));
+        return hostings;
+    }
+
+    /**
+     * The method decides whether the host has been canceled or whether it is a normal host and returns the corresponding object.
+     * @param data the data-JsonObject
+     * @return Hosting
+     */
+    private Hosting getHosting(JsonObject data) {
+        if(data.has("cancellation_data")) {
+            return new CancelledHosting(data);
+        }else{
+            return new Hosting(data);
+        }
+    }
+
+    /**
+     * Requests all hostings from the given account.
+     * @param getParams parameters to be added to the request link
+     * @return a {@link List} of {@link Hosting}
+     * @throws IOException Signals that an I/O exception of some sort has occurred
+     * @apiNote this method can take several seconds, since the API of PPH needs some time to process this request
+     */
+    private JsonObject getHostingsJson(String getParams) throws IOException{
+        String s = HOSTINGS_PATH;
+        if(getParams != null) s += getParams;
+        HttpsURLConnection con = getConnection(s);
+        BufferedReader reader;
+        reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        StringBuilder content = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            content.append(line);
+        }
+        reader.close();
+        con.disconnect();
+        return JsonParser.parseString(content.toString()).getAsJsonObject();
     }
 
 

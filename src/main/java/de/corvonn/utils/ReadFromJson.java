@@ -84,4 +84,21 @@ public class ReadFromJson {
     public static OffsetDateTime readOffsetDateTime(JsonObject jsonObject, String memberName) {
         return readOffsetDateTimeOptional(jsonObject, memberName).orElse(null);
     }
+
+    /**
+     * See class description
+     */
+    @SuppressWarnings("unused")
+    public static Optional<Boolean> readBoolOptional(JsonObject jsonObject, String memberName) {
+        JsonElement element = jsonObject.get(memberName);
+        if(element == null) return Optional.empty();
+        if(element.isJsonNull()) return Optional.empty();
+        return Optional.of(element.getAsBoolean());
+    }
+    /**
+     * See class description
+     */
+    public static boolean readBool(JsonObject jsonObject, String memberName) {
+        return jsonObject.get(memberName).getAsBoolean();
+    }
 }
