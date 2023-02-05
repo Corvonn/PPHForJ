@@ -28,7 +28,7 @@ ein PPHForJ Objekt erstellen:
 PPHForJ pphForJ = new PPHForJ("DEIN TOKEN");
 ```
 
-Mithilfe von diesem Objekt und deinem Token kannst du nun abfragen tätigen: 
+Mithilfe von diesem Objekt kannst du nun abfragen tätigen. Hier einige Beispiele:
 ```java
 //Spenden abfragen
 pphForJ.getInvoices(InvoiceType.DONATION).forEach(invoice -> {
@@ -38,6 +38,14 @@ pphForJ.getInvoices(InvoiceType.DONATION).forEach(invoice -> {
         System.out.println(donation.getDonatorName() + " hat am " + time.getDayOfMonth() + "." + time.getMonthValue() + "." + time.getYear() + " " + donation.getAmount() + "€ gespendet!");
     }
 });
+
+
+//Domains abfragen
+pphForJ.getDomains().forEach(domain -> {
+    OffsetDateTime registeredOn = domain.getRegisterDateCET();
+    System.out.println(domain.getDomain() + " wurde am " + registeredOn.getDayOfMonth() + "." + registeredOn.getMonthValue() + "." + registeredOn.getYear() + "registriert");
+});
+
 
 //Aktive Hostings (KVM/VPS/Webserver/etc) abfragen
 pphForJ.getHostings(false).forEach(hosting -> {
