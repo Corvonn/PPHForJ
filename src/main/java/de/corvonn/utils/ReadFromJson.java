@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.UUID;
 
 /**
  * <p>
@@ -100,5 +101,22 @@ public class ReadFromJson {
      */
     public static boolean readBool(JsonObject jsonObject, String memberName) {
         return jsonObject.get(memberName).getAsBoolean();
+    }
+
+    /**
+     * See class description
+     */
+    public static Optional<UUID> readUUIDOptional(JsonObject jsonObject, String memberName) {
+        JsonElement element = jsonObject.get(memberName);
+        if(element == null) return Optional.empty();
+        if(element.isJsonNull()) return Optional.empty();
+        return Optional.of(UUID.fromString(element.getAsString()));
+    }
+
+    /**
+     * See class description
+     */
+    public static UUID readUUID(JsonObject jsonObject, String memberName) {
+        return readUUIDOptional(jsonObject, memberName).orElse(null);
     }
 }

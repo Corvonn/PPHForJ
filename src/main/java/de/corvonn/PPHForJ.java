@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.corvonn.client.domains.Domain;
+import de.corvonn.client.donation.DonationConfig;
 import de.corvonn.client.hostings.CancelledHosting;
 import de.corvonn.client.hostings.Hosting;
 import de.corvonn.client.invoices.Invoice;
@@ -32,7 +33,8 @@ public class PPHForJ {
     private static final String API_WEB_LINK = "https://api.pph.sh/",
             INVOICES_PATH = "client/invoices",
             DOMAINS_PATH = "client/domains",
-            HOSTINGS_PATH = "client/hostings";
+            HOSTINGS_PATH = "client/hostings",
+            DONATION_CONFIG_PATH = "client/donation/config";
 
     private final String token;
 
@@ -277,6 +279,21 @@ public class PPHForJ {
         }else{
             return new Hosting(data);
         }
+    }
+
+    public DonationConfig getDonationConfig() throws IOException {
+        HttpsURLConnection con = getConnection(DONATION_CONFIG_PATH);
+        BufferedReader reader;
+        reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        StringBuilder content = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            content.append(line);
+        }
+        reader.close();
+        con.disconnect();
+
+        return new DonationConfig(JsonParser.parseString(content.toString()).getAsJsonObject().get("data").getAsJsonObject());
     }
 
     /**
