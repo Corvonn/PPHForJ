@@ -13,6 +13,7 @@ import de.corvonn.client.invoices.InvoiceDonationItem;
 import de.corvonn.client.invoices.InvoiceItem;
 import de.corvonn.client.invoices.Transaction;
 import de.corvonn.enums.InvoiceType;
+import de.corvonn.utils.ReadFromJson;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -131,12 +132,14 @@ public class PPHForJ {
                                 item.get("short_description").getAsString(), item.get("description").getAsString(),
                                 item.get("amount").getAsFloat(), item.get("donation").getAsBoolean(),
                                 donatorName.isJsonNull() ? null : donatorName.getAsString(),
-                                donatorText.isJsonNull() ? null : donatorText.getAsString()));
+                                donatorText.isJsonNull() ? null : donatorText.getAsString(),
+                                ReadFromJson.readInt(item, "relid")));
                     }else{
                         invoiceItems.add(new InvoiceItem(item.get("id").getAsInt(),
                                 item.get("invoiceid").getAsInt(), InvoiceType.getByType(item.get("type").getAsString()),
                                 item.get("short_description").getAsString(), item.get("description").getAsString(),
-                                item.get("amount").getAsFloat(), item.get("donation").getAsBoolean()));
+                                item.get("amount").getAsFloat(), item.get("donation").getAsBoolean(),
+                                ReadFromJson.readInt(item, "relid")));
                     }
                 });
             }
@@ -281,6 +284,7 @@ public class PPHForJ {
         }
     }
 
+    @SuppressWarnings("unused")
     public DonationConfig getDonationConfig() throws IOException {
         HttpsURLConnection con = getConnection(DONATION_CONFIG_PATH);
         BufferedReader reader;

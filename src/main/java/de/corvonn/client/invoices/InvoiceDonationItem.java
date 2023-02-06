@@ -8,8 +8,8 @@ import de.corvonn.enums.InvoiceType;
 public class InvoiceDonationItem extends InvoiceItem{
     private final String donatorName, donatorText;
 
-    public InvoiceDonationItem(int id, int invoiceID, InvoiceType type, String shortDescription, String description, float amount, boolean donation, String donatorName, String donatorText) {
-        super(id, invoiceID, type, shortDescription, description, amount, donation);
+    public InvoiceDonationItem(int id, int invoiceID, InvoiceType type, String shortDescription, String description, float amount, boolean donation, String donatorName, String donatorText, int relID) {
+        super(id, invoiceID, type, shortDescription, description, amount, donation, relID);
         this.donatorName = donatorName;
         this.donatorText = donatorText;
     }

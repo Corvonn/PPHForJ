@@ -8,13 +8,13 @@ import de.corvonn.enums.InvoiceType;
  * But also for example discounts count as an item of the invoice.
  */
 public class InvoiceItem {
-    private final int id, invoiceID;
+    private final int id, invoiceID, relID;
     private final InvoiceType type;
     private final String shortDescription, description;
     private final float amount;
     private final boolean donation;
 
-    public InvoiceItem(int id, int invoiceID, InvoiceType type, String shortDescription, String description, float amount, boolean donation) {
+    public InvoiceItem(int id, int invoiceID, InvoiceType type, String shortDescription, String description, float amount, boolean donation, int relID) {
         this.id = id;
         this.invoiceID = invoiceID;
         this.type = type;
@@ -22,6 +22,12 @@ public class InvoiceItem {
         this.description = description;
         this.amount = amount;
         this.donation = donation;
+        this.relID = relID;
+    }
+
+    @SuppressWarnings("unused")
+    public int getRelID() {
+        return relID;
     }
 
     @SuppressWarnings("unused")
